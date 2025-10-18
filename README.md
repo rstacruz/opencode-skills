@@ -183,10 +183,7 @@ This ensures systematic execution and nothing gets missed.
 
 ## Examples
 
-Check out these example skills:
-
-- **skill-creator** - Meta-skill for creating new skills (included with this plugin)
-- See `.opencode/skills/` in the [repository](https://github.com/malhashemi/opencode-skills) for more examples
+Check out these [example](https://github.com/anthropics/skills) skills from Anthropic repository:
 
 ## Troubleshooting
 
