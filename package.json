@@ -1,0 +1,53 @@
+{
+  "name": "opencode-skills",
+  "version": "1.0.0",
+  "description": "Anthropic Agent Skills Specification plugin for OpenCode - discover and execute skills with dynamic tool registration",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "license": "MIT",
+  "author": "M. Adel Alhashemi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/malhashemi/opencode-skills.git"
+  },
+  "keywords": [
+    "opencode",
+    "skills",
+    "anthropic",
+    "plugin",
+    "agent",
+    "ai",
+    "claude"
+  ],
+  "homepage": "https://github.com/malhashemi/opencode-skills#readme",
+  "bugs": {
+    "url": "https://github.com/malhashemi/opencode-skills/issues"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": "^0.15.0"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "^0.15.0",
+    "@types/bun": "^1.3.0",
+    "bun-types": "^1.3.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "zod": "^3.23.0"
+  }
+}
