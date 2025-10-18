@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/opencode-skills.svg)](https://www.npmjs.com/package/opencode-skills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Bring Anthropic's Agent Skills Specification (v1.0) to OpenCode. This plugin automatically discovers and registers skills as dynamic tools, enabling Claude to leverage specialized knowledge, workflows, and bundled resources.
+Bring Anthropic's Agent Skills Specification (v1.0) to OpenCode. This plugin automatically discovers and registers skills as dynamic tools, enabling the Agent to leverage specialized knowledge, workflows, and bundled resources.
 
 ## Features
 
@@ -40,6 +40,7 @@ mkdir -p .opencode/skills/my-skill
 ```
 
 **`.opencode/skills/my-skill/SKILL.md`:**
+
 ```markdown
 ---
 name: my-skill
@@ -78,7 +79,8 @@ Simply invoke the skill tool:
 skills_my_skill
 ```
 
-Claude will:
+The Agent will:
+
 1. Create a todo list of tasks from the skill
 2. Execute the skill instructions
 3. Track progress through the todo list
@@ -91,13 +93,13 @@ Every skill must have a `SKILL.md` file with YAML frontmatter:
 
 ```markdown
 ---
-name: skill-name          # Must match directory name
+name: skill-name # Must match directory name
 description: What this skill does and when to use it (min 20 chars)
-license: MIT              # Optional
-allowed-tools:            # Optional (parsed but not enforced)
+license: MIT # Optional
+allowed-tools: # Optional (parsed but not enforced)
   - read
   - write
-metadata:                 # Optional key-value pairs
+metadata: # Optional key-value pairs
   version: "1.0"
 ---
 
@@ -121,12 +123,13 @@ my-skill/
 
 ## Skill Naming
 
-| Directory | Frontmatter Name | Tool Name |
-|-----------|-----------------|-----------|
+| Directory           | Frontmatter Name   | Tool Name                 |
+| ------------------- | ------------------ | ------------------------- |
 | `brand-guidelines/` | `brand-guidelines` | `skills_brand_guidelines` |
-| `tools/analyzer/` | `analyzer` | `skills_tools_analyzer` |
+| `tools/analyzer/`   | `analyzer`         | `skills_tools_analyzer`   |
 
 **Rules:**
+
 - Directory name: lowercase with hyphens (`my-skill`)
 - Frontmatter `name`: must match directory name exactly
 - Tool name: auto-generated with underscores (`skills_my_skill`)
@@ -149,7 +152,7 @@ If the skill mentions `references/api.md`, the full path is:
 /path/to/.opencode/skills/my-skill/references/api.md
 ```
 
-Claude automatically understands and resolves these paths correctly.
+The Agent automatically understands and resolves these paths correctly.
 
 ## Global Skills
 
@@ -164,7 +167,7 @@ This skill will be available in every OpenCode project.
 
 ## Execution Workflow
 
-When Claude invokes a skill tool, it receives structured instructions:
+When the Agent invokes a skill tool, it receives structured instructions:
 
 1. **STEP 1: PLAN THE WORK**
    - Use `todowrite` to create task list
@@ -188,21 +191,25 @@ Check out these example skills:
 ## Troubleshooting
 
 **Skills not discovered?**
+
 - Check console for `🎯 Skills Plugin: Starting discovery...`
 - Verify `SKILL.md` files exist in `.opencode/skills/`
 - Check frontmatter validation errors in console
 
 **Tool not appearing?**
+
 - Ensure `name` field matches directory name exactly
 - Check for duplicate tool names (logged as warnings)
 - Restart OpenCode after adding/modifying skills
 
 **Paths not resolving?**
+
 - Check the SKILL DIRECTORY shown in skill output
 - Verify supporting files exist at specified paths
 - Ensure paths in SKILL.md are relative (not absolute)
 
 **Invalid skill errors?**
+
 - Name must be lowercase with hyphens only (`[a-z0-9-]+`)
 - Description must be at least 20 characters
 - Name in frontmatter must match directory name
@@ -212,8 +219,9 @@ Check out these example skills:
 ### Agent-Level Tool Restrictions
 
 Tool restrictions are handled at the OpenCode agent level (via `opencode.json` or agent frontmatter), not at the skill level. This provides:
+
 - Clearer permission model
-- Simpler architecture  
+- Simpler architecture
 - Better alignment with OpenCode's existing system
 
 Skills parse `allowed-tools` from frontmatter for spec compliance, but enforcement happens at the agent level.
@@ -221,6 +229,7 @@ Skills parse `allowed-tools` from frontmatter for spec compliance, but enforceme
 ### No Hot Reload
 
 Skills are treated as project configuration, not runtime state. Adding or modifying skills requires restarting OpenCode. This is acceptable because:
+
 - Skills change infrequently
 - No API exists for runtime tool registration
 - Simpler implementation
@@ -230,10 +239,11 @@ Skills are treated as project configuration, not runtime state. Adding or modify
 ### Plugin Export
 
 ```typescript
-export const SkillsPlugin: Plugin
+export const SkillsPlugin: Plugin;
 ```
 
 The plugin automatically:
+
 1. Scans for `**/SKILL.md` files in discovery paths
 2. Validates YAML frontmatter against spec
 3. Registers a tool for each valid skill
@@ -243,21 +253,22 @@ The plugin automatically:
 
 ```typescript
 interface Skill {
-  name: string              // From frontmatter
-  fullPath: string          // Absolute path to skill directory
-  toolName: string          // Generated tool name
-  description: string       // From frontmatter
-  allowedTools?: string[]   // Parsed but not enforced
-  metadata?: Record<string, string>
-  license?: string
-  content: string           // Markdown body
-  path: string              // Absolute path to SKILL.md
+  name: string; // From frontmatter
+  fullPath: string; // Absolute path to skill directory
+  toolName: string; // Generated tool name
+  description: string; // From frontmatter
+  allowedTools?: string[]; // Parsed but not enforced
+  metadata?: Record<string, string>;
+  license?: string;
+  content: string; // Markdown body
+  path: string; // Absolute path to SKILL.md
 }
 ```
 
 ## Contributing
 
 Contributions welcome! Please:
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
