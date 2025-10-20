@@ -57,15 +57,14 @@ type SkillFrontmatter = z.infer<typeof SkillFrontmatterSchema>
 /**
  * Generate tool name from skill path
  * Examples:
- *   .opencode/skills/brand-guidelines/SKILL.md → skills_brand_guidelines
- *   .opencode/skills/document-skills/docx/SKILL.md → skills_document_skills_docx
+ *   .opencode/skills/brand-guidelines/SKILL.md → brand-guidelines
+ *   .opencode/skills/document-skills/docx/SKILL.md → document-skills-docx
  */
 function generateToolName(skillPath: string, baseDir: string): string {
   const rel = relative(baseDir, skillPath)
   const dirPath = dirname(rel)
   const components = dirPath.split(sep).filter((c) => c !== ".")
-  const prefix = "" /* "skills_" */
-  return prefix + components.join("_").replace(/-/g, "_")
+  return components.join("-")
 }
 
 /**
@@ -199,9 +198,9 @@ export const SkillsPlugin: Plugin = async (ctx) => {
 
   for (const skill of skills) {
     tools[skill.toolName] = tool({
-      description: skill.description,
+      description: `${skill.name} skill: ${skill.description}`,
       args: {},
-      async execute(args, toolCtx) {
+      async execute(/* args, toolCtx */) {
         let prompt = SKILL_PROMPT.replaceAll("%{name}", skill.name)
           .replaceAll("%{fullPath}", skill.fullPath)
           .replaceAll("%{content}", skill.content)
@@ -234,3 +233,4 @@ export const SkillsPlugin: Plugin = async (ctx) => {
 
   return { tool: tools }
 }
+
