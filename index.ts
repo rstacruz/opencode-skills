@@ -64,7 +64,8 @@ function generateToolName(skillPath: string, baseDir: string): string {
   const rel = relative(baseDir, skillPath)
   const dirPath = dirname(rel)
   const components = dirPath.split(sep).filter((c) => c !== ".")
-  return "skills_" + components.join("_").replace(/-/g, "_")
+  const prefix = "" /* "skills_" */
+  return prefix + components.join("_").replace(/-/g, "_")
 }
 
 /**
