@@ -243,7 +243,7 @@ export const SkillsPlugin: Plugin;
 
 The plugin automatically:
 
-1. Scans for `**/SKILL.md` files in discovery paths (`.opencode/skills/`, `~/.opencode/skills/`, `~/.config/opencode/skills/`) (`.opencode/skills/`, `~/.opencode/skills/`, `~/.config/opencode/skills/`)
+1. Scans for `**/SKILL.md` files in discovery paths (`.opencode/skills/`, `~/.opencode/skills/`, `~/.config/opencode/skills/`)
 2. Validates YAML frontmatter against spec
 3. Registers a tool for each valid skill
 4. Returns skill content with execution instructions
