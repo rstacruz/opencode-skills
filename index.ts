@@ -18,37 +18,37 @@
  * @see https://github.com/anthropics/skills
  */
 
-import type { Plugin } from "@opencode-ai/plugin";
-import { tool } from "@opencode-ai/plugin";
-import matter from "gray-matter";
-import { Glob } from "bun";
-import { join, dirname, basename, relative, sep } from "path";
-import { z } from "zod";
-import os from "os";
+import type { Plugin } from "@opencode-ai/plugin"
+import { tool } from "@opencode-ai/plugin"
+import matter from "gray-matter"
+import { Glob } from "bun"
+import { join, dirname, basename, relative, sep } from "path"
+import { z } from "zod"
+import os from "os"
 
 const SKILL_PROMPT = `<skill name="%{name}">
 
 %{content}
 
-</skill>`;
+</skill>`
 
 const RESOURCES_PROMPT = `<skill_resources>
 IMPORTANT: The skill %{name} may reference certain resource files. Use their full paths:
 
 %{paths}
-</skill_resources>`;
+</skill_resources>`
 
 // Types
 interface Skill {
-  name: string; // From frontmatter (e.g., "brand-guidelines")
-  fullPath: string; // Full directory path to skill
-  toolName: string; // Generated tool name (e.g., "skills_brand_guidelines")
-  description: string; // From frontmatter
-  allowedTools?: string[]; // Parsed but not enforced (agent-level restrictions instead)
-  metadata?: Record<string, string>;
-  license?: string;
-  content: string; // Markdown body
-  path: string; // Full path to SKILL.md
+  name: string // From frontmatter (e.g., "brand-guidelines")
+  fullPath: string // Full directory path to skill
+  toolName: string // Generated tool name (e.g., "skills_brand_guidelines")
+  description: string // From frontmatter
+  allowedTools?: string[] // Parsed but not enforced (agent-level restrictions instead)
+  metadata?: Record<string, string>
+  license?: string
+  content: string // Markdown body
+  path: string // Full path to SKILL.md
 }
 
 // Validation Schema
@@ -63,9 +63,9 @@ const SkillFrontmatterSchema = z.object({
   license: z.string().optional(),
   "allowed-tools": z.array(z.string()).optional(),
   metadata: z.record(z.string()).optional(),
-});
+})
 
-type SkillFrontmatter = z.infer<typeof SkillFrontmatterSchema>;
+type SkillFrontmatter = z.infer<typeof SkillFrontmatterSchema>
 
 /**
  * Generate tool name from skill path
@@ -74,10 +74,10 @@ type SkillFrontmatter = z.infer<typeof SkillFrontmatterSchema>;
  *   .opencode/skills/document-skills/docx/SKILL.md → skills_document_skills_docx
  */
 function generateToolName(skillPath: string, baseDir: string): string {
-  const rel = relative(baseDir, skillPath);
-  const dirPath = dirname(rel);
-  const components = dirPath.split(sep).filter((c) => c !== ".");
-  return "skills_" + components.join("_").replace(/-/g, "_");
+  const rel = relative(baseDir, skillPath)
+  const dirPath = dirname(rel)
+  const components = dirPath.split(sep).filter((c) => c !== ".")
+  return "skills_" + components.join("_").replace(/-/g, "_")
 }
 
 /**
@@ -90,39 +90,39 @@ async function parseSkill(
 ): Promise<Skill | null> {
   try {
     // Read file
-    const content = await Bun.file(skillPath).text();
+    const content = await Bun.file(skillPath).text()
 
     // Parse YAML frontmatter
-    const { data, content: markdown } = matter(content);
+    const { data, content: markdown } = matter(content)
 
     // Validate frontmatter schema
-    let frontmatter: SkillFrontmatter;
+    let frontmatter: SkillFrontmatter
     try {
-      frontmatter = SkillFrontmatterSchema.parse(data);
+      frontmatter = SkillFrontmatterSchema.parse(data)
     } catch (error) {
       if (error instanceof z.ZodError) {
-        console.error(`❌ Invalid frontmatter in ${skillPath}:`);
+        console.error(`❌ Invalid frontmatter in ${skillPath}:`)
         error.errors.forEach((err) => {
-          console.error(`   - ${err.path.join(".")}: ${err.message}`);
-        });
+          console.error(`   - ${err.path.join(".")}: ${err.message}`)
+        })
       }
-      return null;
+      return null
     }
 
     // Validate name matches directory
-    const skillDir = basename(dirname(skillPath));
+    const skillDir = basename(dirname(skillPath))
     if (frontmatter.name !== skillDir) {
       console.error(
         `❌ Name mismatch in ${skillPath}:`,
         `\n   Frontmatter name: "${frontmatter.name}"`,
         `\n   Directory name: "${skillDir}"`,
         `\n   Fix: Update the 'name' field in SKILL.md to match the directory name`,
-      );
-      return null;
+      )
+      return null
     }
 
     // Generate tool name from path
-    const toolName = generateToolName(skillPath, baseDir);
+    const toolName = generateToolName(skillPath, baseDir)
 
     return {
       name: frontmatter.name,
@@ -134,13 +134,13 @@ async function parseSkill(
       license: frontmatter.license,
       content: markdown.trim(),
       path: skillPath,
-    };
+    }
   } catch (error) {
     console.error(
       `❌ Error parsing skill ${skillPath}:`,
       error instanceof Error ? error.message : String(error),
-    );
-    return null;
+    )
+    return null
   }
 }
 
@@ -148,20 +148,20 @@ async function parseSkill(
  * Discover all SKILL.md files in the specified base paths
  */
 async function discoverSkills(basePaths: string[]): Promise<Skill[]> {
-  const skills: Skill[] = [];
+  const skills: Skill[] = []
 
   for (const basePath of basePaths) {
     try {
       // Find all SKILL.md files recursively
-      const glob = new Glob("**/SKILL.md");
+      const glob = new Glob("**/SKILL.md")
 
       for await (const match of glob.scan({
         cwd: basePath,
         absolute: true,
       })) {
-        const skill = await parseSkill(match, basePath);
+        const skill = await parseSkill(match, basePath)
         if (skill) {
-          skills.push(skill);
+          skills.push(skill)
         }
       }
     } catch (error) {
@@ -175,21 +175,21 @@ async function discoverSkills(basePaths: string[]): Promise<Skill[]> {
   }
 
   // Detect duplicate tool names
-  const toolNames = new Set<string>();
-  const duplicates = [];
+  const toolNames = new Set<string>()
+  const duplicates = []
 
   for (const skill of skills) {
     if (toolNames.has(skill.toolName)) {
-      duplicates.push(skill.toolName);
+      duplicates.push(skill.toolName)
     }
-    toolNames.add(skill.toolName);
+    toolNames.add(skill.toolName)
   }
 
   if (duplicates.length > 0) {
-    console.warn(`!  Duplicate tool names detected:`, duplicates);
+    console.warn(`!  Duplicate tool names detected:`, duplicates)
   }
 
-  return skills;
+  return skills
 }
 
 // Main Plugin Export
@@ -197,10 +197,10 @@ export const SkillsPlugin: Plugin = async (ctx) => {
   const skills = await discoverSkills([
     join(ctx.directory, ".opencode/skills"),
     join(os.homedir(), ".opencode/skills"),
-  ]);
+  ])
 
   // Create a tool for each skill
-  const tools: Record<string, any> = {};
+  const tools: Record<string, any> = {}
 
   for (const skill of skills) {
     tools[skill.toolName] = tool({
@@ -209,18 +209,18 @@ export const SkillsPlugin: Plugin = async (ctx) => {
       async execute(args, toolCtx) {
         let prompt = SKILL_PROMPT.replaceAll("%{name}", skill.name)
           .replaceAll("%{fullPath}", skill.fullPath)
-          .replaceAll("%{content}", skill.content);
+          .replaceAll("%{content}", skill.content)
 
-        const glob = new Glob("**/*");
-        const resourcePaths: string[] = [];
+        const glob = new Glob("**/*")
+        const resourcePaths: string[] = []
 
         for await (const match of glob.scan({
           cwd: skill.fullPath,
           absolute: true,
         })) {
           // Exclude SKILL.md
-          if (basename(match) === "SKILL.md") continue;
-          resourcePaths.push(match);
+          if (basename(match) === "SKILL.md") continue
+          resourcePaths.push(match)
         }
 
         if (resourcePaths.length > 0) {
@@ -229,13 +229,13 @@ export const SkillsPlugin: Plugin = async (ctx) => {
             RESOURCES_PROMPT.replaceAll("%{name}", skill.name).replaceAll(
               "%{paths}",
               resourcePaths.join("\n"),
-            );
+            )
         }
 
-        return prompt;
+        return prompt
       },
-    });
+    })
   }
 
-  return { tool: tools };
-};
+  return { tool: tools }
+}
