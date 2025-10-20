@@ -174,14 +174,10 @@ async function discoverSkills(basePaths: string[]): Promise<Skill[]> {
 
 // Main Plugin Export
 export const SkillsPlugin: Plugin = async (ctx) => {
-  console.log("🎯 Skills Plugin: Starting discovery...")
-  
   const skills = await discoverSkills([
     join(ctx.directory, ".opencode/skills"),
     join(os.homedir(), ".opencode/skills")
   ])
-  
-  console.log(`✅ Found ${skills.length} skill(s):`, skills.map(s => s.name))
   
   // Create a tool for each skill
   const tools: Record<string, any> = {}
@@ -237,8 +233,6 @@ ${skill.content}
       }
     })
   }
-  
-  console.log(`✅ Registered ${Object.keys(tools).length} skill tool(s)`)
-  
+
   return { tool: tools }
 }
